@@ -21,7 +21,7 @@ export default function RootLayout({
         <header>
           <nav className="flex text-sl items-end h-full z-10">
 
-            <Link href="/" className="h-20">
+            <Link href="/" className="h-19">
               <Image src="/LOGO.png" alt="公司Logo" width={120} height={40}></Image>
             </Link>
 
