@@ -90,7 +90,7 @@ export default function RootLayout({
 
             <div className="ml-auto flex items-center space-x-4 m-4 h-4">
               <p>联系电话 </p>
-              <p className="text-red-500 font-bold">1999999999</p>
+              <p className="text-red-500 font-bold">13232917222</p>
               <Link href="/login" className="transform hover:scale-125 text-white transition bg-red-500 p-2">登录</Link>
               <Link href="/register" className="transform hover:scale-125 transition text-white bg-red-500 p-2">注册</Link>
             </div>  
@@ -100,7 +100,7 @@ export default function RootLayout({
         <footer className="p-4 bg-gray-100 text-gray-900 w-full items-center">
           <p className="bg-gray-100 w-36 p-2 font-semibold text-center">合作伙伴</p>
           <p className=" bg-red-500 text-white p-2 w-36 text-center transform hover:scale-110 transition">代理 / 特许加盟</p>
-          <p className="font-sans m-2 text-center text-sm">©2025 西安巨果电子科技有限公司</p>
+          <p className="font-sans m-2 text-center text-sm">©2025</p>
         </footer>
       </body>
       
