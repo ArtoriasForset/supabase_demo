@@ -52,7 +52,7 @@ export default function RootLayout({
             <div className="relative group p-4 transform hover:bg-gray-200 transition w-32 z-10">
               <Link href="/task" className="p-4 font-semibold hover:underline underline-offset-8">办公地址</Link>
               <div className="absolute text-center absolute left-0 w-32 top-full bg-gray-200 invisible group-hover:visible opacity-0 group-hover:opacity-100">
-                <Link href="/task" className="block p-4 text-gray-700 hover:bg-gray-100 hover:text-red-500">
+                <Link href="/dashboard" className="block p-4 text-gray-700 hover:bg-gray-100 hover:text-red-500">
                   全国布局图
                 </Link>
               </div>
