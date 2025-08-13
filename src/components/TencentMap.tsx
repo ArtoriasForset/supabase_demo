@@ -88,7 +88,7 @@ export default function TencentMap({
         default: new window.TMap.MarkerStyle({
           width: 24,
           height: 24,
-          src: 'https://mapapi.qq.com/web/lbs/javascriptGL/demo/img/markerRed.png',
+          src: 'https://mapapi.qq.com/web/lbs/javascriptGL/demo/img/markerDefault.png',
           anchor: { x: 12, y: 24 }
         }),
       }
