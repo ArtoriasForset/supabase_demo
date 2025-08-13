@@ -27,15 +27,14 @@ export default function LoginPage() {
   }
 
   return (
-    <form onSubmit={handleLogin} className="max-w-md mx-auto p-4 mb-96 mt-32">
-      <h1>登录</h1>
+    <form onSubmit={handleLogin} className="max-w-md mx-auto p-4 mb-[50vh] mt-[20vh] bg-gray-100 rounded shadow">
       <input
         type="email"
         placeholder="邮箱"
         value={email}
         onChange={e => setEmail(e.target.value)}
         required
-        className="border p-2 my-2 w-full"
+        className="border border-blue-500 p-2 my-2 w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
       />
       <input
         type="password"
@@ -43,16 +42,16 @@ export default function LoginPage() {
         value={password}
         onChange={e => setPassword(e.target.value)}
         required
-        className="border p-2 my-2 w-full"
+        className="border border-blue-500 p-2 my-2 w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
       />
-      <button type="submit" className="bg-blue-500 text-white p-2 w-full">
+      <button type="submit" className="bg-blue-600 text-white p-2 w-full text-xl hover:bg-blue-500 transition-colors">
         登录
       </button>
       {error && (
         <>
           <p className="mt-2 text-red-500">{error}</p>
           <p>
-            没有账号？{' '}
+            登录失败-没有账号？{' '}
             <a href="/register" className="text-blue-600 underline">
               去注册
             </a>

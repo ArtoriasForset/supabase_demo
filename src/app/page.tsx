@@ -1,4 +1,8 @@
+'use client';
+
 import Image from "next/image";
+import UserStatus from "./UserStatus";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -12,10 +16,10 @@ export default function Home() {
     priority
   />
 
-  <div className="absolute inset-0 flex items-center justify-center z-10">
+  <div className="absolute inset-0 flex items-center justify-center">
     <div className="text-center">
       <h1 className="text-4xl font-bold mb-4 drop-shadow-lg bg-gray-50 p-2">数智化产业·创孵云社区</h1>
-      <button className="text-xl drop-shadow text-white bg-red-500 w-24 transform hover:scale-110 transition">点击了解</button>
+      <Link href="/task" className="text-xl drop-shadow text-white bg-red-500 transform hover:scale-110 transition inline-block px-3 py-1">点击了解</Link>
     </div>
   </div>
 </div>
