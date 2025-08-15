@@ -7,7 +7,7 @@ import Link from "next/link";
 export default function Home() {
   return (
 <>  
-<div className="w-full h-[60vh] relative z-0">
+<div className="w-full h-[60vh] relative z-0 bg-gray-100">
   <Image
     src="/beijing.jpg"
     alt="首页主图"

@@ -94,7 +94,7 @@ export default function RootLayout({
         </header>
         {children}
         <footer className="p-4 bg-gray-100 text-gray-900 w-full items-center">
-          <p className="bg-gray-100 w-36 p-2 font-semibold text-center">合作伙伴</p>
+          <p className="text-xl bg-gray-100 w-36 p-2 font-semibold text-center">合作伙伴</p>
           <p className=" bg-red-500 text-white p-2 w-36 text-center">代理 / 特许加盟</p>
           <p className="font-sans m-2 text-center text-sm">©2025</p>
         </footer>
