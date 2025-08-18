@@ -12,7 +12,7 @@ export default function DashboardPage() {
         zoom={5}
         markers={[
           { lat: 39.908802, lng: 116.397502, title: '天安门' },
-          { lat: 34.2632, lng: 108.9480, title: '故宫' }
+          { lat: 34.2632, lng: 108.9480, title: '西安' }
         ]}
         className="w-full h-[70vh] rounded shadow overflow-hidden"
       />

@@ -16,6 +16,10 @@ export default function Home() {
       <section className="h-screen bg-pink-300 scroll-snap-start flex items-center justify-center">
         <h1 className="text-4xl font-bold">Section 3</h1>
       </section>
+
+      <section className="h-screen bg-gray-300 scroll-snap-start flex items-center justify-center">
+        <h1 className="text-4xl font-bold">Section 4</h1>
+      </section>
     </div>
   );
 }
