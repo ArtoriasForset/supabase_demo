@@ -9,9 +9,9 @@ export default function DashboardPage() {
         <button className="m-3 bg-blue-500 text-white py-2 px-3 text-xl hover:bg-blue-700 transition-colors">搜索</button>
       <TencentMap
         center={{ lat: 34.2632, lng: 108.9480 }}
-        zoom={4}
+        zoom={5}
+        styleId='1'// 使用自定义样式ID
         markers={[
-          { lat: 39.908802, lng: 116.397502, title: '天安门' },
           { lat: 34.2632, lng: 108.9480, title: '西安' }
         ]}
         className="w-full h-[70vh] rounded shadow overflow-hidden"

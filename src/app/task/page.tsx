@@ -42,7 +42,7 @@ export default function Task() {
   }
 
   return (
-    <div className="container mx-auto p-4 bg-gray-50 rounded shadow m-4 min-h-screen text-center">
+    <div className="z-0 container mx-auto p-4 bg-gray-50 rounded shadow m-4 min-h-screen text-center">
       {loading ? (
         <p>加载中...</p>
       ) : (
