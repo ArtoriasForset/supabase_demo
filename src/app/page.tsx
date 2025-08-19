@@ -25,10 +25,10 @@ export default function Home() {
 </div>
 
   <div className="mx-auto p-10 m-8 font-sans text-4xl text-gray-600">
-    <p className="mb-4">一体化平台：集“投资+孵化+培训+交流”于一体</p>
- 	  <p className="mb-4">六大功能区：创业空间、人才公寓、企业家俱乐部、招商中心、投融资平台、技术展厅 </p>
- 	  <p className="mb-4">三大核心中心：研究中心、服务中心、孵化中心</p>
-  	<p className="mb-4">重点产业方向：5G、大数据、AI、工业互联网、数字创意</p>
+    <p className="mb-4">一体化平台:集“投资+孵化+培训+交流”于一体</p>
+ 	  <p className="mb-4">六大功能区:创业空间、人才公寓、企业家俱乐部、招商中心、投融资平台、技术展厅 </p>
+ 	  <p className="mb-4">三大核心中心:研究中心、服务中心、孵化中心</p>
+  	<p className="mb-4">重点产业方向: 5G、大数据、AI、工业互联网、数字创意</p>
   </div>
 
 </>
