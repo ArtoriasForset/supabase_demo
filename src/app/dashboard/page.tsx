@@ -287,7 +287,7 @@ export default function DashboardPage() {
         
         if (!isNaN(centerLat) && !isNaN(centerLng)) {
           setMapCenter({ lat: centerLat, lng: centerLng })
-          setMapZoom(filtered.length === 1 ? 12 : filtered.length <= 5 ? 10 : 8)
+          setMapZoom(filtered.length === 1 ? 18 : filtered.length <= 5 ? 10 : 8)
         }
       }
     } catch (error) {
