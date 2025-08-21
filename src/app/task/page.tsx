@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import TencentMap from '@/components/TencentMap'
 
 export default function Task() {
-
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [lat, setLat] = useState<number>();
@@ -72,6 +71,9 @@ export default function Task() {
   // 添加地图中心点状态
   const [mapCenter, setMapCenter] = useState({ lat: 34.2632, lng: 108.9480 })
   
+  // 添加地图缩放状态
+  const [mapZoom, setMapZoom] = useState(5)
+
   const handleMapClick = (lat: number, lng: number) => {
     setMarkers([{ lat, lng }])
     setClickedCoords({ lat, lng })
@@ -170,7 +172,7 @@ export default function Task() {
             <h1 className="text-2xl mb-6 text-blue-500">点击获得地图精确坐标</h1>
             <TencentMap
               center={mapCenter}
-              zoom={5}
+              zoom={mapZoom}  // 使用动态缩放值
               markers={markers}
               onMapClick={handleMapClick}
               allowAddMarker={false}
@@ -216,47 +218,185 @@ export default function Task() {
             </button>
 
             {/* 显示已保存的园区数量 */}
-            <div className="text-sm text-gray-600 mt-4">
-              已保存 {userAddresses.length} 个园区
+            <div className="bg-gradient-to-r from-blue-100 to-blue-200 px-4 py-2 rounded-lg border border-blue-300">
+              <div className="flex items-center justify-center space-x-2">
+                <span className="text-blue-800 font-medium">已保存 {userAddresses.length} 个园区</span>
+              </div>
             </div>
           </div>
         </div>
       )}
       
-      <div className="m-8 p-4 bg-white rounded shadow">
-        {user && (
-          <div>
-            {/* 显示用户的所有园区 */}
-            {userAddresses.length > 0 && (
-              <div className="mt-6">
-                <h3 className="text-2xl font-semibold mb-3">我的园区列表 ({userAddresses.length})</h3>
-                <div className="space-y-3">
-                  {userAddresses.map((addr) => (
-                    <div key={addr.id} className="flex items-center justify-between p-3 border rounded-md hover:bg-gray-50">
-                      <div className="flex-1 text-left">
-                        <h4 className="font-medium text-blue-600">{addr.name}</h4>
-                        <p className="text-sm text-gray-600">
-                          {addr.address || '无地址信息'} • 
-                          坐标: {addr.lat?.toFixed(4)}, {addr.lng?.toFixed(4)}
-                        </p>
-                        <p className="text-xs text-gray-400">
-                          创建时间: {new Date(addr.created_at).toLocaleString('zh-CN')}
-                        </p>
-                      </div>
+      {/* 园区列表 - 列表样式 */}
+      <div className="mx-8 mb-8">
+        {user && userAddresses.length > 0 && (
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            {/* 标题区域 */}
+            <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
+              <div>
+                <h3 className="text-2xl font-bold text-gray-900">我的园区列表</h3>
+                <p className="text-gray-500">共 {userAddresses.length} 个园区</p>
+              </div>
+              
+              {/* 统计信息 */}
+              <div className="hidden md:flex items-center space-x-6">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-600">{userAddresses.length}</div>
+                  <div className="text-xs text-gray-500">总园区</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-600">
+                    {userAddresses.filter(addr => addr.address).length}
+                  </div>
+                  <div className="text-xs text-gray-500">有地址</div>
+                </div>
+              </div>
+            </div>
+
+            {/* 表格头部 */}
+            <div className="hidden md:grid md:grid-cols-6 gap-4 py-3 px-4 bg-gray-50 rounded-lg mb-4 text-sm font-medium text-gray-600">
+              <div>序号</div>
+              <div>园区名称</div>
+              <div>地址</div>
+              <div>坐标位置</div>
+              <div>创建时间</div>
+              <div>操作</div>
+            </div>
+
+            {/* 园区列表 */}
+            <div className="space-y-3">
+              {userAddresses.map((addr, index) => (
+                <div 
+                  key={addr.id}
+                  className="border border-gray-200 rounded-lg p-4 hover:border-blue-400 hover:shadow-md transition-all duration-200 cursor-pointer"
+                  onClick={() => router.push(`/park/${addr.id}`)}
+                >
+                  {/* 移动端垂直布局 */}
+                  <div className="md:hidden space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-lg font-bold text-gray-900">{index + 1} {addr.name}</h4>
+                    </div>
+                    
+                    <div>
+                      <span className="text-sm font-medium text-gray-600">地址：</span>
+                      <span className="text-base text-gray-800">{addr.address || "暂无地址信息"}</span>
+                    </div>
+                    
+                    <div>
+                      <span className="text-sm font-medium text-gray-600">坐标：</span>
+                      <span className="text-base font-mono text-gray-800">
+                        {addr.lat?.toFixed(6)}, {addr.lng?.toFixed(6)}
+                      </span>
+                    </div>
+                    
+                    <div>
+                      <span className="text-sm font-medium text-gray-600">创建时间：</span>
+                      <span className="text-base text-gray-800">
+                        {new Date(addr.created_at).toLocaleDateString('zh-CN', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric'
+                        })}
+                      </span>
+                    </div>
+                    
+                    <div className="flex gap-2 pt-2">
                       <button
-                        onClick={() => deletePark(addr.id, addr.name)}
-                        className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition-colors ml-4"
+                        onClick={(e) => {
+                          e.stopPropagation(); // 阻止事件冒泡
+                          setMapCenter({ lat: addr.lat, lng: addr.lng });
+                          setMarkers([{ lat: addr.lat, lng: addr.lng }]);
+                          setMapZoom(15);
+                        }}
+                        className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 px-3 rounded text-sm transition-colors"
+                      >
+                        地图定位
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation(); // 阻止事件冒泡
+                          deletePark(addr.id, addr.name);
+                        }}
+                        className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 px-3 rounded text-sm transition-colors"
                       >
                         删除
                       </button>
                     </div>
-                  ))}
+                  </div>
+
+                  {/* 桌面端水平布局 */}
+                  <div className="hidden md:grid md:grid-cols-6 gap-4 items-center">
+                    <div className="text-base font-medium text-gray-900">
+                      {index + 1}
+                    </div>
+                    
+                    <div className="text-base font-bold text-gray-900 truncate">
+                      {addr.name}
+                    </div>
+                    
+                    <div className="text-base text-gray-700 truncate">
+                      {addr.address || "暂无地址信息"}
+                    </div>
+                    
+                    <div className="text-sm font-mono text-gray-700">
+                      <div>{addr.lat?.toFixed(6)}</div>
+                      <div>{addr.lng?.toFixed(6)}</div>
+                    </div>
+                    
+                    <div className="text-sm text-gray-600">
+                      {new Date(addr.created_at).toLocaleDateString('zh-CN', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                      })}
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation(); // 阻止事件冒泡
+                          setMapCenter({ lat: addr.lat, lng: addr.lng });
+                          setMarkers([{ lat: addr.lat, lng: addr.lng }]);
+                          setMapZoom(15);
+                        }}
+                        className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-3 rounded text-sm transition-colors"
+                      >
+                        定位
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation(); // 阻止事件冒泡
+                          deletePark(addr.id, addr.name);
+                        }}
+                        className="bg-red-500 hover:bg-red-600 text-white py-2 px-3 rounded text-sm transition-colors"
+                      >
+                        删除
+                      </button>
+                    </div>
+                  </div>
                 </div>
+              ))}
+            </div>
+
+            {/* 空状态提示 */}
+            {userAddresses.length === 0 && (
+              <div className="text-center py-12">
+                <h4 className="text-xl font-semibold text-gray-700 mb-2">还没有园区</h4>
+                <p className="text-gray-500">点击上方地图添加您的第一个园区</p>
               </div>
             )}
           </div>
         )}
       </div>
+
+      {/* 消息提示 */}
+      {message && (
+        <div className={`fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${
+          message.includes('成功') ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+        }`}>
+          {message}
+        </div>
+      )}
     </div>
   )
 }
