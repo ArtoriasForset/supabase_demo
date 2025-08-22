@@ -155,7 +155,7 @@ export default function UserStatus() {
       {user?.user_metadata?.role === 'admin' && (
         <Link
           href="/admin/config"
-          className="px-3 py-1 bg-purple-600 text-white text-xs rounded hover:bg-purple-700 transition-colors"
+          className="px-3 py-2 bg-purple-600 text-white text-xs rounded hover:bg-purple-700 transition-colors"
         >
           网站配置
         </Link>

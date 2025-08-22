@@ -30,6 +30,20 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null)
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null)
   const [userPermissions, setUserPermissions] = useState<Set<string>>(new Set())
+  
+  // 添加权限提示弹窗状态
+  const [permissionAlert, setPermissionAlert] = useState<{ 
+    show: boolean; 
+    message: string; 
+    parkName: string;
+    type: 'no_permission' | 'not_logged_in';
+  }>({ 
+    show: false, 
+    message: '',
+    parkName: '',
+    type: 'no_permission'
+  })
+  
   // 添加搜索提示弹窗状态
   const [searchAlert, setSearchAlert] = useState<{ show: boolean; message: string }>({ 
     show: false, 
@@ -128,29 +142,65 @@ export default function DashboardPage() {
     return userPermissions.has(parkId)
   }
 
-  // 设置全局点击处理函数 - 增加权限验证
+  // 显示权限提示弹窗
+  const showPermissionAlert = (parkName: string, type: 'no_permission' | 'not_logged_in') => {
+    let message = ''
+    
+    if (type === 'not_logged_in') {
+      message = `您需要登录后才能查看"${parkName}"的详细信息。登录后您可以创建和管理自己的园区。`
+    } else {
+      message = `您没有权限查看"${parkName}"的详细信息。您只能查看自己创建的园区信息。`
+    }
+    
+    setPermissionAlert({
+      show: true,
+      message,
+      parkName,
+      type
+    })
+  }
+
+  // 关闭权限提示弹窗
+  const closePermissionAlert = () => {
+    setPermissionAlert({
+      show: false,
+      message: '',
+      parkName: '',
+      type: 'no_permission'
+    })
+  }
+
+  // 从权限弹窗跳转到登录页面
+  const goToLoginFromAlert = () => {
+    closePermissionAlert()
+    router.push('/login')
+  }
+
+  // 从权限弹窗返回主页面（重置视图）
+  const backToMainView = () => {
+    closePermissionAlert()
+    // 重置搜索和视图
+    setSearchTerm('')
+    setFilteredParks(parks)
+    if (parks.length > 0) {
+      const centerLat = parks.reduce((sum, park) => sum + park.lat, 0) / parks.length
+      const centerLng = parks.reduce((sum, park) => sum + park.lng, 0) / parks.length
+      setMapCenter({ lat: centerLat, lng: centerLng })
+      setMapZoom(parks.length === 1 ? 12 : parks.length <= 5 ? 8 : 6)
+    }
+  }
+
+  // 设置全局点击处理函数 - 修改为直接跳转，无提示
   useEffect(() => {
     // 为信息窗口中的按钮设置全局处理函数
     window.parkClickHandler = (parkId: string) => {
       try {
         console.log('信息窗口按钮点击:', parkId)
         
-        // 验证用户登录状态
-        if (!currentUser) {
-          setError('请先登录后再查看园区详情')
-          return
-        }
-
         // 验证parkId
         if (!parkId || typeof parkId !== 'string') {
           console.error('无效的园区ID:', parkId)
-          setError('园区ID无效，请重新尝试')
-          return
-        }
-
-        // 检查用户权限
-        if (!hasPermissionToAccess(parkId)) {
-          setError('您没有权限查看此园区详情')
+          router.push('/dashboard') // 直接跳转回地图
           return
         }
 
@@ -158,18 +208,38 @@ export default function DashboardPage() {
         const park = parks.find(p => p.id === parkId)
         if (!park) {
           console.error('园区不存在:', parkId)
-          setError('该园区不存在或已被删除')
+          router.push('/dashboard') // 直接跳转回地图
+          return
+        }
+
+        console.log('找到园区:', park)
+
+        // 验证用户登录状态 - 未登录直接跳转回地图
+        if (!currentUser) {
+          console.log('用户未登录，跳转回地图')
+          router.push('/dashboard')
+          return
+        }
+
+        // 检查用户权限 - 无权限直接跳转回地图
+        const hasAccess = hasPermissionToAccess(parkId)
+        console.log('权限检查结果:', { parkId, hasAccess, userRole: currentUser.role, permissions: Array.from(userPermissions) })
+        
+        if (!hasAccess) {
+          console.log('用户无权限，跳转回地图')
+          router.push('/dashboard')
           return
         }
 
         // 清除错误状态
         setError(null)
         
+        console.log('权限验证通过，跳转到园区详情页')
         // 跳转到园区详情页
         router.push(`/park/${parkId}`)
       } catch (error) {
         console.error('信息窗口跳转失败:', error)
-        setError('页面跳转失败，请重新尝试')
+        router.push('/dashboard') // 出错也跳转回地图
       }
     }
 
@@ -325,34 +395,16 @@ export default function DashboardPage() {
     }
   }
 
-  // 处理地图标记点击事件 - 增加权限验证
+  // 处理地图标记点击事件 - 修改为直接跳转，无提示
   const handleMarkerClick = (marker: any) => {
     try {
       console.log('标记点击事件:', marker)
       setError(null)
       
-      // 验证用户登录状态
-      if (!currentUser) {
-        setError('请先登录后再创建查看自己的园区详情')
-        return
-      }
-
       // 验证marker数据
-      if (!marker) {
-        console.warn('标记数据为空')
-        setError('标记数据无效')
-        return
-      }
-
-      if (!marker.id) {
-        console.warn('标记缺少ID:', marker)
-        setError('标记ID缺失，无法跳转')
-        return
-      }
-
-      // 检查用户权限
-      if (!hasPermissionToAccess(marker.id)) {
-        //setError('您没有权限查看此园区详情')
+      if (!marker || !marker.id) {
+        console.warn('标记数据无效:', marker)
+        router.push('/dashboard') // 直接跳转回地图
         return
       }
 
@@ -360,14 +412,28 @@ export default function DashboardPage() {
       const park = filteredParks.find(p => p.id === marker.id)
       if (!park) {
         console.warn('找不到对应的园区:', marker.id)
-        setError('未找到对应的园区信息')
+        router.push('/dashboard') // 直接跳转回地图
+        return
+      }
+
+      // 验证用户登录状态 - 未登录直接跳转回地图
+      if (!currentUser) {
+        console.log('用户未登录，跳转回地图')
+        router.push('/dashboard')
+        return
+      }
+
+      // 检查用户权限 - 无权限直接跳转回地图
+      if (!hasPermissionToAccess(marker.id)) {
+        console.log('用户无权限，跳转回地图')
+        router.push('/dashboard')
         return
       }
 
       // 验证园区数据完整性
       if (!park.name) {
         console.warn('园区名称缺失:', park)
-        setError('园区数据不完整')
+        router.push('/dashboard') // 直接跳转回地图
         return
       }
 
@@ -377,7 +443,7 @@ export default function DashboardPage() {
       router.push(`/park/${park.id}`)
     } catch (error) {
       console.error('处理标记点击失败:', error)
-      setError('页面跳转失败，请重新尝试')
+      router.push('/dashboard') // 出错也跳转回地图
     }
   }
 
@@ -439,7 +505,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-full bg-gray-100">
-      {/* 搜索结果弹窗 */}
+
       {searchAlert.show && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md mx-4 shadow-xl">
@@ -451,7 +517,8 @@ export default function DashboardPage() {
             <div className="flex justify-end">
               <button
                 onClick={closeSearchAlert}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-red-400"
+                type="button"
               >
                 确定
               </button>
@@ -468,9 +535,16 @@ export default function DashboardPage() {
               <div className="text-blue-400 mr-3">ℹ️</div>
               <div>
                 <p className="text-sm text-blue-800 font-medium">访客模式</p>
-                <p className="text-sm text-blue-700">您当前以访客身份浏览，无法创建园区信息。请登录以获取完整功能。</p>
+                <p className="text-sm text-blue-700">您当前以访客身份浏览，登录后可查看园区详细信息和创建自己的园区。</p>
               </div>
             </div>
+            <button
+              onClick={goToLogin}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
+              type="button"
+            >
+              立即登录
+            </button>
           </div>
         </div>
       )}
@@ -482,20 +556,22 @@ export default function DashboardPage() {
             <div className="flex">
               <div className="text-red-400 mr-3">⚠️</div>
               <div>
-                <p className="text-sm text-red-800 font-medium">操作失败</p>
+                <p className="text-sm text-red-800 font-medium">系统提示</p>
                 <p className="text-sm text-red-700">{error}</p>
               </div>
             </div>
             <div className="flex space-x-2">
               <button
                 onClick={retryLoad}
-                className="text-red-800 hover:text-red-900 text-sm font-medium"
+                className="text-red-800 hover:text-red-900 text-sm font-medium focus:outline-none"
+                type="button"
               >
                 重试
               </button>
               <button
                 onClick={clearError}
-                className="text-red-600 hover:text-red-700 text-sm"
+                className="text-red-600 hover:text-red-700 text-sm focus:outline-none"
+                type="button"
               >
                 ✕
               </button>
@@ -514,6 +590,7 @@ export default function DashboardPage() {
                 {currentUser && (
                   <span className="text-sm font-normal text-gray-500 ml-2">
                     ({currentUser.email})
+                    {currentUser.role === 'admin' && <span className="ml-1 text-red-500">[管理员]</span>}
                   </span>
                 )}
               </h1>
@@ -525,7 +602,7 @@ export default function DashboardPage() {
               </p>
             </div>
             
-            {/* 搜索栏 - 移除清空按钮 */}
+            {/* 搜索栏 */}
             <div className="flex items-center space-x-2 max-w-md">
               <div className="relative flex-1">
                 <input 
@@ -541,7 +618,8 @@ export default function DashboardPage() {
               <button 
                 onClick={handleSearch}
                 disabled={loading}
-                className="bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg font-medium transition-colors text-sm"
+                className="bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg font-medium transition-colors text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
+                type="button"
               >
                 搜索
               </button>
@@ -571,7 +649,7 @@ export default function DashboardPage() {
       </div>
 
       {/* 地图区域 */}
-      <div className="p-4">
+      <div className="p-4 z-0">
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           {mapMarkers.length > 0 ? (
             <TencentMap
@@ -580,7 +658,7 @@ export default function DashboardPage() {
               markers={mapMarkers}
               styleId='1'
               onMarkerClick={handleMarkerClick}
-              className="w-full h-[70vh]"
+              className="w-full h-[70vh] z-0"
             />
           ) : (
             <div className="w-full h-[70vh] flex items-center justify-center bg-gray-50">
@@ -592,7 +670,6 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
-        
       </div>
 
       {/* 空状态 */}
@@ -615,7 +692,8 @@ export default function DashboardPage() {
                   setSearchTerm('')
                   handleSearch()
                 }}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-red-400"
+                type="button"
               >
                 查看所有园区
               </button>

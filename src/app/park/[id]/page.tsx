@@ -68,7 +68,7 @@ export default function ParkDetailPage() {
 
       if (error) {
         console.error('获取园区数据失败:', error)
-        setMessage('园区不存在或无访问权限')
+        setMessage('园区不存在 或 无访问权限')
         setTimeout(() => router.push('/task'), 2000)
         return
       }
@@ -177,8 +177,8 @@ export default function ParkDetailPage() {
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
           <div className="text-red-500 text-xl mb-4">❌</div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">园区不存在</h3>
-          <p className="text-gray-600 mb-4">该园区可能已被删除或您没有访问权限</p>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">无访问权限</h3>
+          <p className="text-gray-600 mb-4">该园区可能已被删除 或 非您所有</p>
           <button
             onClick={() => router.push('/task')}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
