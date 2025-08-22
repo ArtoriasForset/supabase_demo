@@ -30,6 +30,11 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null)
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null)
   const [userPermissions, setUserPermissions] = useState<Set<string>>(new Set())
+  // 添加搜索提示弹窗状态
+  const [searchAlert, setSearchAlert] = useState<{ show: boolean; message: string }>({ 
+    show: false, 
+    message: '' 
+  })
   
   const router = useRouter()
 
@@ -251,10 +256,11 @@ export default function DashboardPage() {
     }
   }
 
-  // 搜索功能 - 增强错误处理
+  // 搜索功能 - 修改为弹窗提示
   const handleSearch = () => {
     try {
       setError(null)
+      setSearchAlert({ show: false, message: '' }) // 清除之前的搜索提示
 
       if (!searchTerm.trim()) {
         setFilteredParks(parks)
@@ -280,19 +286,42 @@ export default function DashboardPage() {
       
       setFilteredParks(filtered)
       
+      // 如果没有搜索结果，显示弹窗提示
+      if (filtered.length === 0) {
+        setSearchAlert({ 
+          show: true, 
+          message: `没有找到包含 "${searchTerm}" 的园区信息，请尝试其他关键词` 
+        })
+        // 保持当前地图视图不变
+        return
+      }
+      
       // 根据搜索结果调整地图视图
-      if (filtered.length > 0) {
-        const centerLat = filtered.reduce((sum, park) => sum + park.lat, 0) / filtered.length
-        const centerLng = filtered.reduce((sum, park) => sum + park.lng, 0) / filtered.length
-        
-        if (!isNaN(centerLat) && !isNaN(centerLng)) {
-          setMapCenter({ lat: centerLat, lng: centerLng })
-          setMapZoom(filtered.length === 1 ? 18 : filtered.length <= 5 ? 10 : 8)
-        }
+      const centerLat = filtered.reduce((sum, park) => sum + park.lat, 0) / filtered.length
+      const centerLng = filtered.reduce((sum, park) => sum + park.lng, 0) / filtered.length
+      
+      if (!isNaN(centerLat) && !isNaN(centerLng)) {
+        setMapCenter({ lat: centerLat, lng: centerLng })
+        setMapZoom(filtered.length === 1 ? 18 : filtered.length <= 5 ? 10 : 8)
       }
     } catch (error) {
       console.error('搜索功能出错:', error)
       setError('搜索功能异常，请重新尝试')
+    }
+  }
+
+  // 关闭搜索提示弹窗
+  const closeSearchAlert = () => {
+    setSearchAlert({ show: false, message: '' })
+    // 关闭弹窗后直接返回主页面，显示所有园区
+    setSearchTerm('')
+    setFilteredParks(parks)
+    // 重置到显示所有园区的视图
+    if (parks.length > 0) {
+      const centerLat = parks.reduce((sum, park) => sum + park.lat, 0) / parks.length
+      const centerLng = parks.reduce((sum, park) => sum + park.lng, 0) / parks.length
+      setMapCenter({ lat: centerLat, lng: centerLng })
+      setMapZoom(parks.length === 1 ? 12 : parks.length <= 5 ? 8 : 6)
     }
   }
 
@@ -410,6 +439,27 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-full bg-gray-100">
+      {/* 搜索结果弹窗 */}
+      {searchAlert.show && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md mx-4 shadow-xl">
+            <div className="flex items-center mb-4">
+              <div className="text-yellow-500 text-2xl mr-3">🔍</div>
+              <h3 className="text-lg font-semibold text-gray-900">搜索结果</h3>
+            </div>
+            <p className="text-gray-700 mb-6">{searchAlert.message}</p>
+            <div className="flex justify-end">
+              <button
+                onClick={closeSearchAlert}
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+              >
+                确定
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 用户状态提示 */}
       {!currentUser && (
         <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mx-4 mt-4 rounded">
@@ -475,7 +525,7 @@ export default function DashboardPage() {
               </p>
             </div>
             
-            {/* 搜索栏 */}
+            {/* 搜索栏 - 移除清空按钮 */}
             <div className="flex items-center space-x-2 max-w-md">
               <div className="relative flex-1">
                 <input 
@@ -495,19 +545,6 @@ export default function DashboardPage() {
               >
                 搜索
               </button>
-              {searchTerm && (
-                <button 
-                  onClick={() => {
-                    setSearchTerm('')
-                    handleSearch()
-                  }}
-                  disabled={loading}
-                  className="bg-gray-500 hover:bg-gray-600 disabled:bg-gray-400 text-white px-3 py-2 rounded-lg text-sm transition-colors"
-                  title="清除搜索"
-                >
-                  ✕
-                </button>
-              )}
             </div>
           </div>
           
